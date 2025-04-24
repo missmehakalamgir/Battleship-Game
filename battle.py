@@ -1,76 +1,101 @@
 import streamlit as st
 
-# --- OOP CLASS ---
+# --- In-Memory Account Storage ---
+if "accounts" not in st.session_state:
+    st.session_state.accounts = {}
 
+# --- BankAccount OOP Class ---
 class BankAccount:
-    def __init__(self, name, balance=0):
+    def __init__(self, name, username, password, balance=0):
         self.name = name
+        self.username = username
+        self.password = password
         self.balance = balance
 
     def deposit(self, amount):
         self.balance += amount
-        return f"₹{amount} deposited successfully. New balance: ₹{self.balance}"
+        return f"✅ ₹{amount} deposited successfully. New balance: ₹{self.balance}"
 
     def withdraw(self, amount):
         if amount <= self.balance:
             self.balance -= amount
-            return f"₹{amount} withdrawn successfully. New balance: ₹{self.balance}"
+            return f"✅ ₹{amount} withdrawn successfully. New balance: ₹{self.balance}"
         else:
-            return "⚠️ Insufficient balance!"
+            return "❌ Insufficient balance!"
 
     def check_balance(self):
         return f"💰 Current Balance: ₹{self.balance}"
 
 
-# --- STREAMLIT UI ---
-
+# --- Streamlit Setup ---
 st.set_page_config(page_title="🏦 MyBank App", layout="centered")
-st.title("🏦 Welcome to MyBank")
-st.markdown("### Your Simple Digital Bank Interface")
+st.markdown("<h1 style='text-align: center;'>🏦 MyBank - Digital Banking</h1>", unsafe_allow_html=True)
+st.markdown("---")
 
-# Session state
-if "account" not in st.session_state:
-    st.session_state.name_entered = False
+# Session states
+if "logged_in" not in st.session_state:
+    st.session_state.logged_in = False
 
-# Step 1: Enter user name
-if not st.session_state.get("name_entered"):
-    user_name = st.text_input("👤 Enter your name to create an account:")
 
+# --- Step 1: Create Account ---
+with st.expander("📝 Create Account"):
+    name = st.text_input("Full Name", key="create_name")
+    username = st.text_input("Username", key="create_user")
+    password = st.text_input("Password", type="password", key="create_pass")
     if st.button("Create Account"):
-        if user_name.strip() == "":
-            st.warning("Please enter a valid name.")
+        if username in st.session_state.accounts:
+            st.warning("⚠️ Username already exists.")
+        elif not username or not password or not name:
+            st.warning("⚠️ All fields are required.")
         else:
-            st.session_state.account = BankAccount(user_name)
-            st.session_state.name_entered = True
-            st.success(f"Account created for {user_name}!")
-            st.balloons()
+            account = BankAccount(name, username, password)
+            st.session_state.accounts[username] = account
+            st.success("✅ Account created successfully! You can now log in.")
 
-# Step 2: Show Banking Interface
-else:
-    account = st.session_state.account
-    st.markdown(f"### 👋 Hello, **{account.name}**")
 
-    action = st.radio("Select an action", ["Deposit", "Withdraw", "Check Balance"], horizontal=True)
+# --- Step 2: Login Form ---
+if not st.session_state.logged_in:
+    with st.expander("🔐 Login to Your Account", expanded=True):
+        login_user = st.text_input("Username", key="login_user")
+        login_pass = st.text_input("Password", type="password", key="login_pass")
 
-    if action == "Deposit":
-        deposit_amount = st.number_input("Enter amount to deposit", min_value=1, step=1)
+        if st.button("Login"):
+            accounts = st.session_state.accounts
+            if login_user in accounts and accounts[login_user].password == login_pass:
+                st.session_state.logged_in = True
+                st.session_state.active_user = login_user
+                st.success(f"✅ Logged in as {login_user}")
+                st.experimental_rerun()
+            else:
+                st.error("❌ Invalid username or password.")
+
+
+# --- Step 3: Banking Dashboard ---
+if st.session_state.logged_in:
+    acc = st.session_state.accounts[st.session_state.active_user]
+    st.markdown(f"### 👋 Welcome, **{acc.name}** (`@{acc.username}`)")
+    st.markdown("#### 💼 What would you like to do today?")
+    option = st.radio("", ["💰 Deposit", "💸 Withdraw", "📊 Check Balance"], horizontal=True)
+
+    if option == "💰 Deposit":
+        amount = st.number_input("Enter deposit amount", min_value=1, step=1, key="deposit_amt")
         if st.button("Deposit"):
-            msg = account.deposit(deposit_amount)
-            st.success(msg)
+            st.success(acc.deposit(amount))
 
-    elif action == "Withdraw":
-        withdraw_amount = st.number_input("Enter amount to withdraw", min_value=1, step=1)
+    elif option == "💸 Withdraw":
+        amount = st.number_input("Enter withdrawal amount", min_value=1, step=1, key="withdraw_amt")
         if st.button("Withdraw"):
-            msg = account.withdraw(withdraw_amount)
+            msg = acc.withdraw(amount)
             if "Insufficient" in msg:
                 st.error(msg)
             else:
                 st.success(msg)
 
-    elif action == "Check Balance":
-        st.info(account.check_balance())
+    elif option == "📊 Check Balance":
+        st.info(acc.check_balance())
 
     st.markdown("---")
-    if st.button("❌ Close Account"):
-        st.session_state.clear()
+    if st.button("🚪 Logout"):
+        st.session_state.logged_in = False
+        st.session_state.active_user = None
         st.experimental_rerun()
