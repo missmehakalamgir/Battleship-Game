@@ -60,10 +60,22 @@ def main():
     coffee_choice = st.sidebar.radio("Choose your coffee", ["Espresso", "Latte", "Cappuccino"])
     action = st.sidebar.radio("What would you like to do?", ["Make Coffee", "Check Status", "Add Resources"])
 
+    # --- Coffee Buttons ---
     if action == "Make Coffee":
-        if st.button(f"Make {coffee_choice}"):
-            message = coffee_machine.make_coffee(coffee_choice)
+        if st.button("Make Espresso"):
+            message = coffee_machine.make_coffee("Espresso")
             st.write(message)
+            st.image("https://www.thecoffeebean.com/sites/default/files/styles/large/public/2020-11/Espresso.jpg?itok=HtPBVJHh", width=300)
+        
+        if st.button("Make Latte"):
+            message = coffee_machine.make_coffee("Latte")
+            st.write(message)
+            st.image("https://www.thecoffeebean.com/sites/default/files/styles/large/public/2020-11/Latte.jpg?itok=9TbT3mti", width=300)
+        
+        if st.button("Make Cappuccino"):
+            message = coffee_machine.make_coffee("Cappuccino")
+            st.write(message)
+            st.image("https://www.thecoffeebean.com/sites/default/files/styles/large/public/2020-11/Cappuccino.jpg?itok=ecV8YFcN", width=300)
 
     elif action == "Check Status":
         st.subheader("Current Resources")
