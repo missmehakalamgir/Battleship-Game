@@ -96,8 +96,8 @@ if not st.session_state.get("name_entered"):
 
     if option == "Create Account":
         st.markdown('<p class="header">Create Your Account</p>', unsafe_allow_html=True)
-        user_name = st.text_input("👤 Enter your name:", key="create_name", class_="input-field")
-        user_password = st.text_input("🔒 Create a password:", type="password", key="create_password", class_="input-field")
+        user_name = st.text_input("👤 Enter your name:", key="create_name")
+        user_password = st.text_input("🔒 Create a password:", type="password", key="create_password")
         
         if st.button("Create Account", key="create_button", class_="button"):
             if user_name.strip() == "" or user_password.strip() == "":
@@ -110,8 +110,8 @@ if not st.session_state.get("name_entered"):
 
     elif option == "Login":
         st.markdown('<p class="header">Login to Your Account</p>', unsafe_allow_html=True)
-        login_name = st.text_input("👤 Enter your name to login:", key="login_name", class_="input-field")
-        login_password = st.text_input("🔒 Enter your password:", type="password", key="login_password", class_="input-field")
+        login_name = st.text_input("👤 Enter your name to login:", key="login_name")
+        login_password = st.text_input("🔒 Enter your password:", type="password", key="login_password")
         
         if st.button("Login", key="login_button", class_="button"):
             if login_name == st.session_state.get("account").name and login_password == st.session_state.get("account").password:
