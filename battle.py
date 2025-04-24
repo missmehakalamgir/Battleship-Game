@@ -99,7 +99,7 @@ if not st.session_state.get("name_entered"):
         user_name = st.text_input("👤 Enter your name:", key="create_name")
         user_password = st.text_input("🔒 Create a password:", type="password", key="create_password")
         
-        if st.button("Create Account", key="create_button", class_="button"):
+        if st.button("Create Account", key="create_button"):
             if user_name.strip() == "" or user_password.strip() == "":
                 st.markdown('<p class="error">Please enter a valid name and password.</p>', unsafe_allow_html=True)
             else:
@@ -113,7 +113,7 @@ if not st.session_state.get("name_entered"):
         login_name = st.text_input("👤 Enter your name to login:", key="login_name")
         login_password = st.text_input("🔒 Enter your password:", type="password", key="login_password")
         
-        if st.button("Login", key="login_button", class_="button"):
+        if st.button("Login", key="login_button"):
             if login_name == st.session_state.get("account").name and login_password == st.session_state.get("account").password:
                 st.session_state.name_entered = True
                 st.success(f"Welcome back, {login_name}!", icon="✅")
@@ -131,14 +131,14 @@ if st.session_state.get("name_entered"):
     if action == "Deposit":
         st.markdown('<p class="subheader">Deposit Amount</p>', unsafe_allow_html=True)
         deposit_amount = st.number_input("Enter amount to deposit", min_value=1, step=1, key="deposit_amount")
-        if st.button("Deposit", key="deposit_button", class_="button"):
+        if st.button("Deposit", key="deposit_button"):
             msg = account.deposit(deposit_amount)
             st.success(msg)
 
     elif action == "Withdraw":
         st.markdown('<p class="subheader">Withdraw Amount</p>', unsafe_allow_html=True)
         withdraw_amount = st.number_input("Enter amount to withdraw", min_value=1, step=1, key="withdraw_amount")
-        if st.button("Withdraw", key="withdraw_button", class_="button"):
+        if st.button("Withdraw", key="withdraw_button"):
             msg = account.withdraw(withdraw_amount)
             if "Insufficient" in msg:
                 st.markdown('<p class="error">{}</p>'.format(msg), unsafe_allow_html=True)
@@ -150,6 +150,6 @@ if st.session_state.get("name_entered"):
         st.info(account.check_balance())
 
     st.markdown("---")
-    if st.button("❌ Logout", key="logout_button", class_="button"):
+    if st.button("❌ Logout", key="logout_button"):
         st.session_state.clear()
         st.rerun()
