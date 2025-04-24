@@ -1,77 +1,76 @@
 import streamlit as st
 import random
+import time
 
 # --- OOP Classes ---
 
-class Ship:
-    def __init__(self, size=1):
-        self.size = size
-        self.positions = []
+class Card:
+    def __init__(self, value):
+        self.value = value
+        self.is_matched = False
+        self.is_flipped = False
 
-    def place(self, board_size):
-        self.positions = [(random.randint(0, board_size - 1), random.randint(0, board_size - 1))]
+class MemoryGame:
+    def __init__(self):
+        emojis = ['🍎', '🐶', '🚗', '⚽', '🌈', '🎵', '🍕', '🌻']
+        deck = emojis * 2
+        random.shuffle(deck)
+        self.grid = [Card(value) for value in deck]
+        self.first_card_index = None
+        self.matches = 0
+        self.total_pairs = len(deck) // 2
 
-class Board:
-    def __init__(self, size=5):
-        self.size = size
-        self.grid = [["🟦" for _ in range(size)] for _ in range(size)]
-        self.ships = []
-        self.hits = set()
-        self.misses = set()
+    def flip_card(self, index):
+        card = self.grid[index]
+        if card.is_matched or card.is_flipped:
+            return False
 
-    def place_ship(self):
-        ship = Ship()
-        ship.place(self.size)
-        self.ships.append(ship)
+        card.is_flipped = True
+        if self.first_card_index is None:
+            self.first_card_index = index
+        else:
+            first_card = self.grid[self.first_card_index]
+            if first_card.value == card.value:
+                card.is_matched = True
+                first_card.is_matched = True
+                self.matches += 1
+            else:
+                time.sleep(0.5)  # Pause before hiding mismatched cards
+                card.is_flipped = False
+                first_card.is_flipped = False
+            self.first_card_index = None
+        return True
 
-    def check_hit(self, row, col):
-        for ship in self.ships:
-            if (row, col) in ship.positions:
-                self.hits.add((row, col))
-                return True
-        self.misses.add((row, col))
-        return False
+    def is_won(self):
+        return self.matches == self.total_pairs
 
-    def all_ships_sunk(self):
-        all_positions = set()
-        for ship in self.ships:
-            all_positions.update(ship.positions)
-        return all_positions.issubset(self.hits)
+# --- Streamlit Setup ---
 
-# --- Streamlit App Logic ---
+st.set_page_config(page_title="🧠 Memory Matching Game", layout="centered")
+st.title("🧠 Card Matching Game")
 
-st.set_page_config(page_title="Battleship Game", layout="centered")
-st.title("🛳️ Single Player Battleship Game")
-st.markdown("Try to sink the hidden ships!")
+if "game" not in st.session_state:
+    st.session_state.game = MemoryGame()
 
-# Game state initialization
-if "board" not in st.session_state:
-    st.session_state.board = Board()
-    for _ in range(3):  # place 3 ships
-        st.session_state.board.place_ship()
-
-board = st.session_state.board
+game = st.session_state.game
 status_placeholder = st.empty()
 
-# Show grid
-for row in range(board.size):
-    cols = st.columns(board.size)
-    for col in range(board.size):
-        cell = "🟦"
-        if (row, col) in board.hits:
-            cell = "💥"
-        elif (row, col) in board.misses:
-            cell = "❌"
-        if cols[col].button(cell, key=f"{row}-{col}"):
-            if (row, col) in board.hits or (row, col) in board.misses:
-                status_placeholder.info("Already targeted this cell!")
-            elif board.check_hit(row, col):
-                status_placeholder.success("🎯 It's a HIT!")
-            else:
-                status_placeholder.warning("💨 It's a MISS!")
+# Display 4x4 Grid
+grid_size = 4
+for row in range(grid_size):
+    cols = st.columns(grid_size)
+    for col in range(grid_size):
+        index = row * grid_size + col
+        card = game.grid[index]
+        if card.is_flipped or card.is_matched:
+            cols[col].button(card.value, key=str(index), disabled=True)
+        else:
+            if cols[col].button("❓", key=str(index)):
+                game.flip_card(index)
 
-# End game
-if board.all_ships_sunk():
-    st.success("🏆 Congratulations! You sank all ships!")
+# Win Message
+if game.is_won():
+    st.balloons()
+    st.success("🎉 You matched all the cards!")
     if st.button("Play Again"):
-        del st.session_state.board
+        del st.session_state.game
