@@ -1,157 +1,78 @@
 import streamlit as st
-import random
 import datetime
 
-# Class to manage tasks
-class Task:
-    def __init__(self, task_name, due_date):
-        self.task_name = task_name
-        self.due_date = due_date
-
-    def display_task(self):
-        return f"Task: {self.task_name} | Due Date: {self.due_date}"
-
-# Class to manage reminders
-class Reminder:
-    def __init__(self, reminder_text, reminder_time):
-        self.reminder_text = reminder_text
-        self.reminder_time = reminder_time
-
-    def display_reminder(self):
-        return f"Reminder: {self.reminder_text} | Time: {self.reminder_time}"
-
-# Class to get the weather
-class Weather:
-    def __init__(self, location):
-        self.location = location
-
-    def get_weather(self):
-        # Simulate a simple weather fetch (could be extended with actual API calls)
-        weather_conditions = ["Sunny", "Cloudy", "Rainy", "Windy"]
-        temperature = random.randint(15, 30)  # Random temperature
-        condition = random.choice(weather_conditions)
-        return f"The weather in {self.location} is {condition} with a temperature of {temperature}°C."
-
-# Class to manage personal calendar
-class Calendar:
-    def __init__(self):
-        self.events = []
-
-    def add_event(self, event_name, event_date):
-        event = {"event": event_name, "date": event_date}
-        self.events.append(event)
-
-    def display_events(self):
-        if self.events:
-            return "\n".join([f"Event: {event['event']} on {event['date']}" for event in self.events])
-        else:
-            return "No events scheduled."
-
-# Parent class for conversations
+# Class for handling questions related to Python and Streamlit
 class PersonalAssistantBot:
     def __init__(self, name):
         self.name = name
-        self.tasks = []
-        self.reminders = []
-        self.calendar = Calendar()
 
     def greet(self):
-        return f"Hello! I'm {self.name}, your personal assistant. How can I help you today?"
+        return f"Hello! I'm {self.name}, your personal assistant. How can I help you with Python or Streamlit today?"
 
-    def set_task(self, task_name, due_date):
-        task = Task(task_name, due_date)
-        self.tasks.append(task)
-        return f"Task '{task_name}' has been set for {due_date}."
-
-    def set_reminder(self, reminder_text, reminder_time):
-        reminder = Reminder(reminder_text, reminder_time)
-        self.reminders.append(reminder)
-        return f"Reminder set: {reminder_text} at {reminder_time}."
-
-    def ask_weather(self, location):
-        weather = Weather(location)
-        return weather.get_weather()
-
-    def add_event(self, event_name, event_date):
-        self.calendar.add_event(event_name, event_date)
-        return f"Event '{event_name}' added to calendar on {event_date}."
-
-    def display_tasks(self):
-        if self.tasks:
-            return "\n".join([task.display_task() for task in self.tasks])
+    def provide_python_help(self, question):
+        # Example responses based on common Python-related questions
+        if "list" in question.lower():
+            return "In Python, a list is an ordered collection of items. You can create a list using square brackets. Example: `my_list = [1, 2, 3]`"
+        elif "dictionary" in question.lower():
+            return "A dictionary in Python is a collection of key-value pairs. You can create one using curly braces. Example: `my_dict = {'key': 'value'}`"
+        elif "function" in question.lower():
+            return "A function in Python is defined using the `def` keyword. Example: `def my_function():`"
+        elif "for loop" in question.lower():
+            return "A for loop in Python allows you to iterate over a sequence. Example: `for i in range(5):`"
+        elif "import" in question.lower():
+            return "In Python, you can import modules using the `import` keyword. Example: `import math`"
         else:
-            return "No tasks found."
+            return "I can help with Python! Please ask a specific question, and I'll do my best to assist."
 
-    def display_reminders(self):
-        if self.reminders:
-            return "\n".join([reminder.display_reminder() for reminder in self.reminders])
+    def provide_streamlit_help(self, question):
+        # Example responses for Streamlit-related questions
+        if "st.title" in question.lower():
+            return "In Streamlit, you can set the title of your app using `st.title('Your Title')`."
+        elif "st.button" in question.lower():
+            return "The `st.button()` widget in Streamlit creates a button. Example: `if st.button('Click me'): ...`"
+        elif "st.write" in question.lower():
+            return "`st.write()` is a versatile function that can display text, data, or even charts in Streamlit. Example: `st.write('Hello World!')`"
+        elif "st.text_input" in question.lower():
+            return "`st.text_input()` creates a text input box. Example: `name = st.text_input('Enter your name')`"
+        elif "st.sidebar" in question.lower():
+            return "You can add elements to the sidebar in Streamlit using `st.sidebar`. Example: `st.sidebar.button('Click')`."
         else:
-            return "No reminders found."
+            return "Ask me something related to Streamlit, and I'll help you out!"
 
-    def display_calendar(self):
-        return self.calendar.display_events()
+    def help_with_question(self, question):
+        # Check if the question is related to Python or Streamlit
+        if "python" in question.lower():
+            return self.provide_python_help(question)
+        elif "streamlit" in question.lower():
+            return self.provide_streamlit_help(question)
+        else:
+            return "I can assist with Python or Streamlit. Please ask your question again with one of these keywords."
+
 
 # Streamlit App Layout
-st.title("Personal Assistant Bot")
+st.title("Personal Assistant Bot for Python and Streamlit")
 
-# Create bot instance
+# Create the assistant bot instance
 bot = PersonalAssistantBot(name="Buddy")
 
 # Greet the user
 st.subheader(bot.greet())
 
-# User input fields
-task_name = st.text_input("Enter task name:")
-due_date = st.date_input("Enter due date for task:")
-reminder_text = st.text_input("Enter reminder text:")
-reminder_time = st.time_input("Enter reminder time:")
-location = st.text_input("Enter location for weather:")
-event_name = st.text_input("Enter event name:")
-event_date = st.date_input("Enter event date for calendar:")
+# Input text box for user question
+question = st.text_input("Ask me anything related to Python or Streamlit:")
 
-# Button for setting task
-if st.button("Set Task"):
-    if task_name and due_date:
-        response = bot.set_task(task_name, str(due_date))
-        st.success(response)
-    else:
-        st.error("Please enter both task name and due date.")
+# Provide response based on the user's question
+if question:
+    response = bot.help_with_question(question)
+    st.write(response)
 
-# Button for setting reminder
-if st.button("Set Reminder"):
-    if reminder_text and reminder_time:
-        response = bot.set_reminder(reminder_text, str(reminder_time))
-        st.success(response)
-    else:
-        st.error("Please enter both reminder text and reminder time.")
-
-# Button for asking weather
-if st.button("Get Weather"):
-    if location:
-        response = bot.ask_weather(location)
-        st.success(response)
-    else:
-        st.error("Please enter a location.")
-
-# Button for adding event to calendar
-if st.button("Add Event"):
-    if event_name and event_date:
-        response = bot.add_event(event_name, str(event_date))
-        st.success(response)
-    else:
-        st.error("Please enter both event name and event date.")
-
-# Displaying tasks
-if st.button("Display Tasks"):
-    tasks = bot.display_tasks()
-    st.text_area("Your Tasks:", tasks)
-
-# Displaying reminders
-if st.button("Display Reminders"):
-    reminders = bot.display_reminders()
-    st.text_area("Your Reminders:", reminders)
-
-# Displaying calendar
-if st.button("Display Calendar"):
-    calendar = bot.display_calendar()
-    st.text_area("Your Events:", calendar)
+# Instructions to guide users
+st.markdown("""
+### How to Use:
+- Ask me questions related to **Python** or **Streamlit**.
+- Example questions:
+    - "How do I create a list in Python?"
+    - "What is the use of st.button in Streamlit?"
+    - "How can I define a function in Python?"
+    - "How do I import a module in Python?"
+""")
